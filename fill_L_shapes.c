@@ -1,125 +1,70 @@
-#include <stdio.h>
+#include <stdio.h> 
  
-int board[65][65];
-int turn;
+int board[64][64], C;
  
-int my_pow(int num, int p)
+void go(int n, int lx, int ly, int ux, int uy, int x, int y)
 {
-    int tmp;
-    if (p == 1)
-        return num;
-    tmp = my_pow(num, p / 2);
-    if (p % 2)
-        return tmp * tmp * num;
-    else
-        return tmp * tmp;
-}
+    if (n == 0) return;
+    int mx = (lx + ux) / 2;
+    int my = (ly + uy) / 2;
  
-int pos(int cx, int cy, int dx, int dy)
-{
-    if (dx <= cx)
-    {
-        if (dy <= cy)
-            return 1;
-        else
-            return 3;
-    }
+    int num = C++;
+    bool xin = lx <= x && x < mx;
+    bool yin = ly <= y && y < my;
+    if (xin && yin) go(n - 1, lx, ly, mx, my, x, y);
     else
     {
-        if (dy <= cy)
-            return 2;
-        else
-            return 4;
+        board[mx - 1][my - 1] = num;
+        go(n - 1, lx, ly, mx, my, mx - 1, my - 1);
+    }
+ 
+    if (xin && !yin) go(n - 1, lx, my, mx, uy, x, y);
+    else
+    {
+        board[mx - 1][my] = num;
+        go(n - 1, lx, my, mx, uy, mx - 1, my);
+    }
+ 
+    if (!xin && yin) go(n - 1, mx, ly, ux, my, x, y);
+    else
+    {
+        board[mx][my - 1] = num;
+        go(n - 1, mx, ly, ux, my, mx, my - 1);
+    }
+ 
+    if (!xin && !yin) go(n - 1, mx, my, ux, uy, x, y);
+    else
+    {
+        board[mx][my] = num;
+        go(n - 1, mx, my, ux, uy, mx, my);
     }
 }
  
-void blocking(int lx, int ly, int rx, int ry, int dx, int dy)
-{
-    int cx = (lx + rx) / 2, cy = (ly + ry) / 2;
-    int i, j;
- 
-    if (rx - lx == 1)
-    {
-        for (i = ly; i <= ry; ++i)
-        {
-            for (j = lx; j <= rx; ++j)
-            {
-                if ((i == dy) && (j == dx))
-                    continue;
-                board[i][j] = turn;
-            }
-        }
-        ++turn;
-        return;
-    }
-    switch (pos(cx, cy, dx, dy))
-    {
-    case 1:
-        board[cy][cx + 1] = turn;
-        board[cy + 1][cx] = turn;
-        board[cy + 1][cx + 1] = turn;
-        ++turn;
-        blocking(lx, ly, cx, cy, dx, dy);//
-        blocking(cx + 1, ly, rx, cy, cx + 1, cy);
-        blocking(lx, cy + 1, cx, ry, cx, cy + 1);
-        blocking(cx + 1, cy + 1, rx, ry, cx + 1, cy + 1);
-        break;
-    case 2:
-        board[cy][cx] = turn;
-        board[cy + 1][cx] = turn;
-        board[cy + 1][cx + 1] = turn;
-        ++turn;
-        blocking(lx, ly, cx, cy, cx, cy);
-        blocking(cx + 1, ly, rx, cy, dx, dy);//
-        blocking(lx, cy + 1, cx, ry, cx, cy + 1);
-        blocking(cx + 1, cy + 1, rx, ry, cx + 1, cy + 1);
-        break;
-    case 3:
-        board[cy][cx] = turn;
-        board[cy][cx + 1] = turn;
-        board[cy + 1][cx + 1] = turn;
-        ++turn;
-        blocking(lx, ly, cx, cy, cx, cy);
-        blocking(cx + 1, ly, rx, cy, cx + 1, cy);
-        blocking(lx, cy + 1, cx, ry, dx, dy);//
-        blocking(cx + 1, cy + 1, rx, ry, cx + 1, cy + 1);
-        break;
-    case 4:
-        board[cy][cx] = turn;
-        board[cy][cx + 1] = turn;
-        board[cy + 1][cx] = turn;
-        ++turn;
-        blocking(lx, ly, cx, cy, cx, cy);
-        blocking(cx + 1, ly, rx, cy, cx + 1, cy);
-        blocking(lx, cy + 1, cx, ry, cx, cy + 1);
-        blocking(cx + 1, cy + 1, rx, ry, dx, dy);//
-        break;
-    }
- 
-}
  
 int main()
 {
-    int T, test_case;
-    int N, x, y;
-    int tmp;
-    int i, j;
+    int T;
+    //freopen("input.txt", "r", stdin);
+    //setbuf(stdout, NULL);
+    scanf("%d", &T);
  
-    scanf("%d", &test_case);
-    for (T = 0; T < test_case; ++T)
+    while (T--)
     {
-        turn = 1;
+        int N, x, y;
         scanf("%d %d %d", &N, &x, &y);
-        board[x][y] = 0;
-        tmp = my_pow(2, N);
-        blocking(1, 1, tmp, tmp, y, x);
-        for (i = 1; i <= tmp; ++i)
+        board[--x][--y] = 0;
+        C = 1;
+        go(N, 0, 0, (1 << N), (1 << N), x, y);
+        for (int i = 0; i < (1 << N); i++)
         {
-            for (j = 1; j <= tmp; ++j)
+            for (int j = 0; j < (1 << N); j++)
+            {
                 printf("%d ", board[i][j]);
+            }
             printf("\n");
         }
-    }
  
+ 
+    }
     return 0;
 }
