@@ -1,5 +1,7 @@
+// 2^N size, (x,y) bad block, count how many L-shaped blocks consist of 3 blocks.
+
 #include <stdio.h> 
- 
+
 int board[64][64], C;
  
 void go(int n, int lx, int ly, int ux, int uy, int x, int y)
