@@ -22,4 +22,5 @@ int countPairings(bool taken[10]) {
         }
     }
     
+    return ret;
 }
